@@ -1,7 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { Course } from "../entities/course.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import { CreateCourseDto } from "../dtos/createCourse.dto";
 
 @Injectable()
 export class CourseRepository{
@@ -10,13 +11,13 @@ export class CourseRepository{
             private readonly courseRepository: Repository<Course>,
     ) {}    
     
-    async createCourse(){
+    async createCourse(createCourseDto: CreateCourseDto): Promise<Course | null>{
         try{
-            const course = this.courseRepository.create();
-            
+            const course = this.courseRepository.create(createCourseDto);
+            return await this.courseRepository.save(course);
         }catch(error){
-
+            console.error('Error in creating a new course', error.message);
+            throw new InternalServerErrorException('Error in creating a new Course');
         }
-
     }
 }

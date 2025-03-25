@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Enrollment } from './enrollment.entity';
 import { User } from '../../users/entities/users.entity';
+import { CourseStatus } from 'src/common/enums/courseStatus.enum';
 
 @Entity('courses')
 export class Course {
@@ -21,11 +22,11 @@ export class Course {
 
   @Column({
     type: 'enum',
-    enum: ['Open', 'Closed', 'Completed'],
-    default: 'Open',
+    enum: CourseStatus,
+    default:  CourseStatus.OPEN,
     nullable: false,
   })
-  status: 'Open' | 'Closed' | 'Completed'; // Enrollment status
+  status: CourseStatus; // Enrollment status
 
   @Column({ type: 'varchar', length: 500, nullable: true })
   description: string; // Optional description (max 500 chars)

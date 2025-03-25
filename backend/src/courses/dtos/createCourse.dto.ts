@@ -1,6 +1,7 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { CourseStatus } from "src/common/enums/courseStatus.enum";
 
-export class createCourseDto {
+export class CreateCourseDto {
     @IsNotEmpty()
     @IsString()
     title: string;
@@ -17,8 +18,8 @@ export class createCourseDto {
     duration: number;
 
     @IsNotEmpty()
-    @IsString()
-    status: string;
+    @IsEnum(CourseStatus)
+    status: CourseStatus;
 
     @IsNotEmpty()
     @IsString()
