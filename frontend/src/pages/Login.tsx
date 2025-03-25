@@ -1,67 +1,178 @@
-import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Box } from '@mui/material';
-import { useDispatch } from 'react-redux';
-// import { setCredentials } from '../redux/slices/authSlice';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React from "react";
+import { Container, TextField, Button, Typography, Box, MenuItem, Divider, Paper, InputAdornment } from "@mui/material";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { motion } from "framer-motion";
+import { Email, Lock } from "@mui/icons-material";
 
-const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const dispatch = useDispatch();
+const Register: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('http://localhost:3000/auth/login', {
-        email,
-        password,
-      });
-    //   dispatch(setCredentials({
-    //     token: response.data.access_token,
-    //     role: response.data.role,
-    //     userId: response.data.userId,
-    //   }));
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Login failed', error);
-    }
-  };
+  // ✅ Validation Schema
+  const validationSchema = Yup.object({
+    email: Yup.string().email("Invalid email format").required("Email is required"),
+    password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+  });
+
+  // 🎯 Formik Hook
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema,
+    onSubmit: async (values) => {
+      try {
+        await axios.post("http://localhost:8000/auth/register", values);
+        navigate("/login");
+      } catch (error) {
+        console.error("Registration failed", error);
+      }
+    },
+  });
 
   return (
-    <>
-    
-      <Container maxWidth="sm" sx={{ py: 8 }}>
-        <Typography variant="h4" gutterBottom>
-          Login
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit}>
-          <TextField
-            label="Email"
-            fullWidth
-            margin="normal"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            type="email"
-          />
-          <TextField
-            label="Password"
-            fullWidth
-            margin="normal"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            type="password"
-          />
-          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-            Login
-          </Button>
-        </Box>
-      </Container>
-    </>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: 'linear-gradient(135deg, #1f1c2c, #928DAB)', // ✅ Same as Home Page
+      }}
+    >
+      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8 }}>
+        <Paper
+          elevation={10}
+          sx={{
+            p: 5,
+            borderRadius: 5,
+            textAlign: "center",
+            backdropFilter: "blur(12px)",
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
+            color: "#fff",
+            width: "400px",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            boxShadow: "0px 8px 20px rgba(0,0,0,0.3)",
+          }}
+        >
+          {/* Animated Heading */}
+          <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.7 }}>
+            <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ color: "#FFD700" }}>
+              Welcome Back!, Login
+            </Typography>
+          </motion.div>
+
+          {/* Registration Form */}
+          <Box component="form" onSubmit={formik.handleSubmit} noValidate>
+            {/* Custom Styled TextFields */}
+
+            {/* Email Field */}
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
+              <TextField
+                label="Email"
+                fullWidth
+                margin="normal"
+                {...formik.getFieldProps("email")}
+                error={formik.touched.email && Boolean(formik.errors.email)}
+                helperText={formik.touched.email && formik.errors.email}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email sx={{ color: "#FFD700" }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  input: { color: "#fff" },
+                  label: { color: "#ddd", "&.Mui-focused": { color: "#FFD700" } },
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": { borderColor: "rgba(255, 255, 255, 0.5)" },
+                    "&:hover fieldset": { borderColor: "#FFD700" },
+                    "&.Mui-focused fieldset": { borderColor: "#FFD700" },
+                  },
+                }}
+              />
+            </motion.div>
+
+            {/* Password Field */}
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
+              <TextField
+                label="Password"
+                type="password"
+                fullWidth
+                margin="normal"
+                {...formik.getFieldProps("password")}
+                error={formik.touched.password && Boolean(formik.errors.password)}
+                helperText={formik.touched.password && formik.errors.password}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Lock sx={{ color: "#FFD700" }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  input: { color: "#fff" },
+                  label: { color: "#ddd", "&.Mui-focused": { color: "#FFD700" } },
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": { borderColor: "rgba(255, 255, 255, 0.5)" },
+                    "&:hover fieldset": { borderColor: "#FFD700" },
+                    "&.Mui-focused fieldset": { borderColor: "#FFD700" },
+                  },
+                }}
+              />
+            </motion.div>
+
+            {/* Submit Button with Neon Glow Effect */}
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={{ duration: 0.3 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                sx={{
+                  mt: 3,
+                  background: "linear-gradient(45deg, #ff9a9e, #ff6b6b)",
+                  color: "#fff",
+                  fontWeight: "bold",
+                  fontSize: "1.1rem",
+                  boxShadow: "0px 4px 15px rgba(255, 255, 255, 0.3)",
+                  "&:hover": {
+                    background: "linear-gradient(45deg, #ff6b6b, #ff9a9e)",
+                    boxShadow: "0px 5px 20px rgba(255, 255, 255, 0.5)",
+                  },
+                }}
+              >
+                Login 🚀
+              </Button>
+            </motion.div>
+          </Box>
+
+          {/* Divider */}
+          <Divider sx={{ my: 3, backgroundColor: "#ddd" }} />
+
+          {/* Already have an account? */}
+          <Typography variant="body2" sx={{ textAlign: "center", mt: 2 }}>
+            Don't have an account?{" "}
+            <Typography
+              component="span"
+              sx={{
+                color: "#FFD700",
+                fontWeight: 600,
+                cursor: "pointer",
+                "&:hover": { textDecoration: "underline" },
+              }}
+              onClick={() => navigate("/register")}
+            >
+              Register
+            </Typography>
+          </Typography>
+        </Paper>
+      </motion.div>
+    </Box>
   );
 };
 
-export default Login;
+export default Register;
