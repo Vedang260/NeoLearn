@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException, ParseIntPipe } from "@nestjs/common";
 import { CourseRepository } from "../repositories/course.repository";
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -21,8 +21,6 @@ export class CourseService{
             if (!title || !instructor_id || !instructor_name || !duration || !description) {
                 throw new BadRequestException('Missing required course fields');
             }
-
-    
             // Video upload logic
             const videoUrl = `/videos/${Date.now()}-${file.originalname}`;
     
@@ -32,16 +30,16 @@ export class CourseService{
                 title,
                 instructor_id,
                 instructor_name,
-                duration,
+                duration: Number(duration),
                 description,
                 video_url: videoUrl, // Add generated video URL
             };
-          const course = this.courseRepository.createCourse(courseData);
+          const course = await this.courseRepository.createCourse(courseData);
           
           return { 
             success: true, 
             message: 'Course created successfully',
-            course
+            course: course
         };
         } catch (error) {
           console.error('Error in creating course:', error.message);
