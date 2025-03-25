@@ -21,14 +21,14 @@ export class UsersController {
   @Get(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<User> {
+  async findOne(@Param('id') id: string): Promise<User> {
     return this.usersService.findOne(id);
   }
 
   @Delete(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  async remove(@Param('id') id: string): Promise<void> {
     return this.usersService.removeUser(id);
   }
 } 

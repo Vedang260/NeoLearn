@@ -25,7 +25,7 @@ export class UsersService {
     
   }
 
-  async findOne(id: number): Promise<User> {
+  async findOne(id: string): Promise<User> {
     const user = await this.usersRepository.findOne(id);
     
     if (!user) {
@@ -43,7 +43,7 @@ export class UsersService {
     return this.usersRepository.createUser(createUserDto);
   }
 
-  async removeUser(id: number): Promise<void> {
+  async removeUser(id: string): Promise<void> {
     const result = await this.usersRepository.deleteUser(id);
     
     if (!result) {

@@ -34,7 +34,7 @@ export class UsersRepository{
     }
 
     // deletes a user
-    async deleteUser(id: number): Promise<boolean> {
+    async deleteUser(id: string): Promise<boolean> {
         try{
             const result = await this.userRepository.delete(id);
             return result.affected ? result.affected > 0 : false;
@@ -55,7 +55,7 @@ export class UsersRepository{
     }
     
     // finds a particular User based on user_id
-    async findOne(id: number): Promise<User | null> {
+    async findOne(id: string): Promise<User | null> {
       return this.userRepository.findOne({ where: { id } });
     }
 }
