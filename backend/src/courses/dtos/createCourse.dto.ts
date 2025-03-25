@@ -18,10 +18,6 @@ export class CreateCourseDto {
     duration: number;
 
     @IsNotEmpty()
-    @IsEnum(CourseStatus)
-    status: CourseStatus;
-
-    @IsNotEmpty()
     @IsString()
     description: string;
 

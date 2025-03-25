@@ -20,4 +20,13 @@ export class CourseRepository{
             throw new InternalServerErrorException('Error in creating a new Course');
         }
     }
+
+    async getAllCourses(): Promise<Course[] | null>{
+        try{
+            return await this.courseRepository.find();
+        }catch(error){
+            console.error('Error in fetching all the courses');
+            throw new InternalServerErrorException('Error in fetching all the courses');
+        }
+    }
 }
