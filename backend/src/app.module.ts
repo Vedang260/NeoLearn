@@ -4,12 +4,14 @@ import { UsersModule } from './users/modules/users.module';
 import { AuthModule } from './auth/modules/auth.module';
 import { typeOrmConfig } from './config/database.config';
 import { AuthMiddleware } from './auth/middlewares/auth.middleware';
+import { CourseModule } from './courses/modules/course.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeOrmConfig),
     AuthModule,
     UsersModule,
+    CourseModule
   ],
 })
 export class AppModule {
@@ -18,7 +20,7 @@ export class AppModule {
     .apply(AuthMiddleware)
     .forRoutes(
       { path: 'users', method: RequestMethod.ALL },
-      { path: 'expenses', method: RequestMethod.ALL }
+      { path: 'courses', method: RequestMethod.ALL }
     );
   }
 }

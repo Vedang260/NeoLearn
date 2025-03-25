@@ -47,7 +47,7 @@ export class CourseService{
           console.error('Error in creating course:', error.message);
           throw new InternalServerErrorException('Error in creating a new course');
         }
-      }
+    }
     
         async getAllCourses(): Promise<{success: boolean; message: string; courses: Course[] | null}> {
             try{
