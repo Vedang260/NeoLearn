@@ -10,8 +10,8 @@ export class UsersRepository{
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
-    ) {}    
-    
+    ) {}        
+
     // finds the user by email
     async findUserByEmail(email: string): Promise<User | null> {
         try{

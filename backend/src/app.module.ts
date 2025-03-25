@@ -5,13 +5,15 @@ import { AuthModule } from './auth/modules/auth.module';
 import { typeOrmConfig } from './config/database.config';
 import { AuthMiddleware } from './auth/middlewares/auth.middleware';
 import { CourseModule } from './courses/modules/course.module';
+import { EnrollmentModule } from './courses/modules/enrollment.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeOrmConfig),
     AuthModule,
     UsersModule,
-    CourseModule
+    CourseModule,
+    EnrollmentModule
   ],
 })
 export class AppModule {
