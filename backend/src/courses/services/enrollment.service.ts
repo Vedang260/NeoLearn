@@ -27,4 +27,22 @@ export class EnrollmentService{
             }
         }
     }
+
+    async getAllEnrolledCourses(user_id: string) : Promise<{ success: boolean; message: string; enrolledCourses: any}>{
+        try{
+            const courses = await this.enrollmentRepository.getAllEnrolledCourses(user_id);
+            return {
+                success: true,
+                message: 'Start completing your courses',
+                enrolledCourses: courses
+            }
+        }catch(error){
+            console.error('Error in getting the enrolled courses: ', error.message);
+            return{
+                success: false,
+                message: error.message,
+                enrolledCourses: null
+            }
+        }
+    }
 }

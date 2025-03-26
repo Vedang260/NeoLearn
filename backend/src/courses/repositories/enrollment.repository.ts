@@ -19,4 +19,17 @@ export class EnrollmentRepository{
             throw new InternalServerErrorException('Error in enrollment');
         }
     }
+    
+    async getAllEnrolledCourses(user_id: string){
+        try{
+            const enrollemnts = this.enrollmentRepository.find({
+                where: { user_id },
+                relations: ['course']
+            });
+            return enrollemnts;
+        }catch(error){
+            console.error('Error in retrieving enrollemnts of the user: ', error.message);
+            throw new InternalServerErrorException('Error in retrieving all enrollemts');
+        }
+    }
 }
