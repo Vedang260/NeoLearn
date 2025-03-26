@@ -30,7 +30,7 @@ export class CourseController {
         storage: diskStorage({
             destination: './uploads/videos',
             filename: (req, file, cb) => {
-                const filename = `${Date.now()}-${file.originalname}`;
+                const filename = `${Date.now()}-${file.originalname.replace(/\s/g, '_')}`;
                 cb(null, filename);
             }
         }),

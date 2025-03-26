@@ -3,6 +3,7 @@ import { Course } from "../entities/course.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CreateCourseDto } from "../dtos/createCourse.dto";
+import { CourseStatus } from "src/common/enums/courseStatus.enum";
 
 @Injectable()
 export class CourseRepository{
@@ -23,7 +24,9 @@ export class CourseRepository{
 
     async getAllCourses(): Promise<Course[] | null>{
         try{
-            return await this.courseRepository.find();
+            return await this.courseRepository.find({
+                where: {status: CourseStatus.OPEN}
+            });
         }catch(error){
             console.error('Error in fetching all the courses');
             throw new InternalServerErrorException('Error in fetching all the courses');
