@@ -1,13 +1,14 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, IconButton } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../redux/store';
+import { RootState } from '../redux/store/store';
 import { logout } from '../redux/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 const Navbar: React.FC = () => {
-  const { role, token } = useSelector((state: RootState) => state.auth);
+  const { user, token } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -49,7 +50,7 @@ const Navbar: React.FC = () => {
 
         {/* Navigation Buttons */}
         <Box sx={{ display: 'flex', gap: 2 }}>
-          {token ? (
+          {token && user ? (
             <>
               <Button
                 component={motion.button}
@@ -73,7 +74,7 @@ const Navbar: React.FC = () => {
               >
                 Dashboard
               </Button>
-              {role === 'student' && (
+              {user && (
                 <Button
                   component={motion.button}
                   whileHover={{ scale: 1.05 }}
@@ -94,32 +95,17 @@ const Navbar: React.FC = () => {
                   }}
                   onClick={() => navigate('/courses')}
                 >
-                  Explore Courses
+                  Courses
                 </Button>
               )}
-              <Button
-                component={motion.button}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                sx={{
-                  color: '#fff',
-                  fontFamily: 'Raleway, sans-serif',
-                  fontWeight: 'bold',
-                  px: 3,
-                  py: 1,
-                  borderRadius: '25px',
-                  background: 'linear-gradient(45deg, #ff6b6b, #ff9a9e)', // Matches Home CTA gradient
-                  boxShadow: '0px 4px 15px rgba(255, 105, 180, 0.3)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                    boxShadow: '0px 8px 20px rgba(255, 105, 180, 0.5)',
-                  },
-                }}
-                onClick={handleLogout}
-              >
-                Logout
-              </Button>
+              {/* User Name */}
+              <Typography variant="h6" sx={{ color: '#FFD700', fontWeight: 'bold' }}>
+                  {user.username}
+              </Typography>
+              {/* Logout Icon */}
+              <IconButton onClick={handleLogout} sx={{ color: '#fff' }}>
+                <ExitToAppIcon fontSize="large" />
+              </IconButton>
             </>
           ) : (
             <>

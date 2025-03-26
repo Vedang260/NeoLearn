@@ -6,10 +6,18 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { motion } from "framer-motion";
 import { Email, Lock, Person } from "@mui/icons-material";
+import { toast } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCredentials, setLoading } from '../redux/slices/authSlice';
+import { RootState } from "../redux/store/store";
+import { register } from "../services/auth/api";
+import Navbar from "../components/Navbar";
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
+  const loading = useSelector((state: RootState) => state.auth.loading);
+  
   // ✅ Validation Schema
   const validationSchema = Yup.object({
     username: Yup.string().min(3, "Username must be at least 3 characters").required("Username is required"),
@@ -29,15 +37,26 @@ const Register: React.FC = () => {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        await axios.post("http://localhost:8000/auth/register", values);
-        navigate("/login");
+        // passing the form values & making an API call
+        const response = await register(values);  
+          console.log("Auth Response: ", response);   
+          if(response.status === 201){
+              dispatch(setCredentials(response.data));
+              toast.success("Registration successful!");
+              navigate("/login");
+          } else{
+              toast.error("Error in user registration");
+          }
       } catch (error) {
         console.error("Registration failed", error);
+      }finally {
+        dispatch(setLoading(false));
       }
     },
   });
 
   return (
+    <>
     <Box
       sx={{
         minHeight: "100vh",
@@ -228,6 +247,7 @@ const Register: React.FC = () => {
         </Paper>
       </motion.div>
     </Box>
+    </>
   );
 };
 

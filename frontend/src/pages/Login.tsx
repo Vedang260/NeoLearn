@@ -6,9 +6,16 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { motion } from "framer-motion";
 import { Email, Lock } from "@mui/icons-material";
+import { login } from "../services/auth/api";
+import { setCredentials, setLoading } from "../redux/slices/authSlice";
+import { toast } from 'react-toastify';
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, store } from "../redux/store/store";
 
 const Register: React.FC = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const loading = useSelector((state: RootState) => state.auth.loading);
 
   // ✅ Validation Schema
   const validationSchema = Yup.object({
@@ -25,10 +32,30 @@ const Register: React.FC = () => {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        await axios.post("http://localhost:8000/auth/register", values);
-        navigate("/login");
+        const response = await login(values);
+        const data: any = response.data;
+        console.log("API Response Data:", data); // Check if API returns correct data
+
+  if (data?.success) {
+    console.log("Dispatching Token:", data.token); // Log token before dispatching
+
+    dispatch(setCredentials({ token: data.token, user: data.user }));
+    
+    // Verify token immediately after dispatch
+    setTimeout(() => {
+      console.log("Stored Token in Redux:", store.getState().auth.token);
+      console.log("User: ", store.getState().auth.user);
+    }, 100); // Small delay to ensure Redux state is updated
+
+    toast.success(data.message);
+    navigate("/dashboard");
+  }else{
+          toast.error(data.message);
+        }
       } catch (error) {
-        console.error("Registration failed", error);
+        toast.error("Failed to login");
+      } finally {
+        dispatch(setLoading(false));
       }
     },
   });

@@ -8,20 +8,20 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-    user: null,
-    token: localStorage.getItem("token"),
-    loading: false
-}
-
+  user: localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")!) : null, // ✅ Restore user
+  token: localStorage.getItem("token"),
+  loading: false
+};
 
 const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
       setCredentials: (state, action: PayloadAction<AuthResponse>) => {
-        state.user = null;
+        state.user = action.payload.user;
         state.token = action.payload.token;
         localStorage.setItem("token", action.payload.token);
+        localStorage.setItem("user", JSON.stringify(action.payload.user));
         state.loading = false;
       },
       logout: (state) => {
