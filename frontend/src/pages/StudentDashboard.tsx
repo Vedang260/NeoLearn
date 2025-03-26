@@ -1,40 +1,39 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Typography, Box, Card, CardContent, CardMedia, LinearProgress, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store/store';
 import Navbar from '../components/Navbar';
 import { useNavigate } from 'react-router-dom';
+import { getAllEnrolledCourses } from '../services/courses/api';
+import { toast } from 'react-toastify';
+import { EnrolledCourseData } from '../types/course';
 
 const StudentDashboard: React.FC = () => {
   const { user, token } = useSelector((state: RootState) => state.auth);
+  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourseData[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!token || user?.role !== 'student') {
       navigate('/login');
     }
+    fetchEnrolledCourses();
   }, [token, user?.role, navigate]);
 
-  // Mock enrolled courses
-  const enrolledCourses = [
-    {
-      id: 1,
-      title: 'React Basics',
-      progress: 75,
-      status: 'In Progress',
-      enrolledDate: '2024-03-12',
-      thumbnail: 'https://via.placeholder.com/300x180?text=React+Course',
-    },
-    {
-      id: 2,
-      title: 'TypeScript Mastery',
-      progress: 30,
-      status: 'In Progress',
-      enrolledDate: '2024-04-05',
-      thumbnail: 'https://via.placeholder.com/300x180?text=TypeScript+Course',
-    },
-  ];
+  const fetchEnrolledCourses = async() => {
+    try{
+      const response = await getAllEnrolledCourses();
+      if(response.data.success){
+        setEnrolledCourses(response.data.enrolledCourses);
+        toast.success(response.data.message);
+      }else{
+        toast.error(response.data.message);
+      }
+    }catch(error){
+
+    }
+  }
 
   return (
     <>
@@ -83,7 +82,13 @@ const StudentDashboard: React.FC = () => {
                 onClick={() => navigate(`/course/${course.id}`)}
               >
                 {/* Course Thumbnail */}
-                <CardMedia component="img" height="180" image={course.thumbnail} alt={course.title} />
+                <CardMedia 
+                  component="video" 
+                  height="180"
+                  src={`http://localhost:8000${course.course.video_url}`}  
+                  controls
+                  style={{ objectFit: 'cover', borderRadius: '10px' }}
+                />
 
                 <CardContent>
                   {/* Course Title */}
@@ -95,12 +100,12 @@ const StudentDashboard: React.FC = () => {
                       textShadow: '2px 2px 10px rgba(255, 255, 255, 0.2)',
                     }}
                   >
-                    {course.title}
+                    {course.course.title}
                   </Typography>
 
                   {/* Enrolled Date & Status */}
                   <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                    Enrolled on: {course.enrolledDate}
+                    Enrolled on: {course.enrollment_date}
                   </Typography>
                   <Typography
                     variant="body1"
