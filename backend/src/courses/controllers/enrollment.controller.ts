@@ -1,4 +1,4 @@
-import { Controller, UseGuards, Post, Req, Body, Get } from "@nestjs/common";
+import { Controller, UseGuards, Post, Req, Body, Get, Put, Patch, Param } from "@nestjs/common";
 import { EnrollmentService } from "../services/enrollment.service";
 import { JwtAuthGuard } from "src/auth/guards/jwt_auth.guard";
 import { UserRole } from "src/common/enums/roles.enum";
@@ -22,5 +22,12 @@ export class EnrollmentController {
     @Roles(UserRole.STUDENT)
     async getAllEnrolledCourses(@Req() req: Request){
         return this.enrollmentService.getAllEnrolledCourses(req['user'].userId);
+    }
+
+    @Patch(':id')
+    @UseGuards(RolesGuard)
+    @Roles(UserRole.STUDENT)
+    async updateEnrolledCourse(@Param('id') id: string, @Body() bodyData: any){
+        return this.enrollmentService.updateEnrolledCourse(id, bodyData.video_time_watched, bodyData.duration);
     }
 }

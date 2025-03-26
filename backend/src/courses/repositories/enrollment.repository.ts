@@ -1,7 +1,8 @@
 import { Repository } from "typeorm";
 import { Enrollment } from "../entities/enrollment.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { EnrolledCourseStatus } from "src/common/enums/courseStatus.enum";
 
 @Injectable()
 export class EnrollmentRepository{
@@ -30,6 +31,25 @@ export class EnrollmentRepository{
         }catch(error){
             console.error('Error in retrieving enrollemnts of the user: ', error.message);
             throw new InternalServerErrorException('Error in retrieving all enrollemts');
+        }
+    }
+
+    async updateEnrolledCourse(id: string, video_time_watched: number, progress: number, status: EnrolledCourseStatus){
+        try{
+            const enrollment = await this.enrollmentRepository.findOne({ where: { id } });
+
+            if (!enrollment) {
+                throw new NotFoundException('enrollment not found');
+            }
+
+            enrollment.status = status;
+            enrollment.progress = progress;
+            enrollment.video_time_watched = video_time_watched;
+
+            return await this.enrollmentRepository.save(enrollment);
+        }catch(error){
+            console.error('Error in updating the status & progress: ', error.message);
+            throw new InternalServerErrorException('Error in updating the status & progress');
         }
     }
 }

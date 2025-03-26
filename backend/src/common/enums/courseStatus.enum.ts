@@ -3,3 +3,7 @@ export enum CourseStatus {
     CLOSED = 'Closed',
     COMPLETED = 'Completed',
   }
+export enum EnrolledCourseStatus {
+  IN_PROGRESS = 'In Progress',
+  COMPLETED = 'Completed'
+}

@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { EnrollmentRepository } from "../repositories/enrollment.repository";
+import { EnrolledCourseStatus } from "src/common/enums/courseStatus.enum";
 
 @Injectable()
 export class EnrollmentService{
@@ -42,6 +43,31 @@ export class EnrollmentService{
                 success: false,
                 message: error.message,
                 enrolledCourses: null
+            }
+        }
+    }
+
+    async updateEnrolledCourse(id: string, video_time_watched: number, duration: number): Promise<{success: boolean; message: string;}>{
+        try{
+            // Calculate progress percentage (rounded to 2 decimal places)
+            let progress = parseFloat(((video_time_watched / duration) * 100).toFixed(2));
+            let status = EnrolledCourseStatus.IN_PROGRESS;
+            // Ensure progress doesn't exceed 100%
+            progress = Math.min(progress, 100);
+            video_time_watched = video_time_watched;
+            if(progress === 100.00){
+                status = EnrolledCourseStatus.COMPLETED;
+            }
+            await this.enrollmentRepository.updateEnrolledCourse(id, video_time_watched,progress, status);
+            return {
+                success: true,
+                message: 'Your course status is updated successfully'
+            }
+        }catch(error){
+            console.error('Error in updating the course status: ', error.message);
+            return {
+                success: false,
+                message: error.message
             }
         }
     }

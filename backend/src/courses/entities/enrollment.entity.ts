@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../users/entities/users.entity';
 import { Course } from './course.entity';
+import { EnrolledCourseStatus } from 'src/common/enums/courseStatus.enum';
 
 @Entity('enrollments')
 export class Enrollment {
@@ -24,11 +25,11 @@ export class Enrollment {
 
   @Column({
     type: 'enum',
-    enum: ['In Progress', 'Completed'],
-    default: 'In Progress',
+    enum: EnrolledCourseStatus,
+    default: EnrolledCourseStatus.IN_PROGRESS,
     nullable: false,
   })
-  status: 'In Progress' | 'Completed'; // User-specific status
+  status: EnrolledCourseStatus; // User-specific status
 
   // Many-to-One relationship with User
   @ManyToOne(() => User, (user) => user.enrollments, { onDelete: 'CASCADE' })
