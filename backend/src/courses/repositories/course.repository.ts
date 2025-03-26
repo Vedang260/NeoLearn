@@ -32,4 +32,33 @@ export class CourseRepository{
             throw new InternalServerErrorException('Error in fetching all the courses');
         }
     }
+
+    async deleteCourse(id: string): Promise<boolean>{
+        try{
+            const res = await this.courseRepository.delete(id);
+            return (res.affected  && res.affected > 0 ? true : false); 
+        }catch(error){
+            console.error('Error in deleting the course: ', error.message);
+            throw new InternalServerErrorException('Error in deleting the course: ');
+        }
+    }
+
+    async updateCourseStatus(id: string, status: CourseStatus): Promise<boolean>{
+        try{
+            const updateResult = await this.courseRepository.update(id, { status });
+            return (updateResult.affected && updateResult.affected > 0 ? true : false)
+        }catch(error){
+            console.error('Error in updating course status: ', error.message);
+            throw new InternalServerErrorException('Error in updating the course');
+        }
+    }
+
+    async getAllCoursesForInstructor(instructor_id: string){
+        try{
+            return await this.courseRepository.findBy({ instructor_id });
+        }catch(error){
+            console.error('Error in getting courses: ', error.message);
+            throw new InternalServerErrorException('Error in getting the course');
+        }
+    }
 }

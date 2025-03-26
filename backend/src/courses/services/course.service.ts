@@ -5,6 +5,7 @@ import { extname, join } from 'path';
 import { Course } from "../entities/course.entity";
 import { CreateCourseDto } from "../dtos/createCourse.dto";
 import * as ffmpeg from 'fluent-ffmpeg';
+import { CourseStatus } from "src/common/enums/courseStatus.enum";
 
 @Injectable()
 export class CourseService{
@@ -63,23 +64,78 @@ export class CourseService{
         });
     }
     
-        async getAllCourses(): Promise<{success: boolean; message: string; courses: Course[] | null}> {
-            try{
-                const courses = await this.courseRepository.getAllCourses();
+    async getAllCourses(): Promise<{success: boolean; message: string; courses: Course[] | null}> {
+        try{
+            const courses = await this.courseRepository.getAllCourses();
+            return {
+                success: true,
+                message: 'Explore our courses',
+                courses: courses
+            }
+        }catch(error){
+            console.error('Error in getting all courses:', error.message);
+            throw new InternalServerErrorException('Error in getting all courses');
+        }
+    }
+
+    async deleteCourse(course_id: string): Promise<{success: boolean; message: string; }>{
+        try{
+            const res = await this.courseRepository.deleteCourse(course_id);
+            if(res){
                 return {
                     success: true,
-                    message: 'Explore our courses',
-                    courses: courses
+                    message: 'Course is deleted successfully'
                 }
-            }catch(error){
-                console.error('Error in getting all courses:', error.message);
-                throw new InternalServerErrorException('Error in getting all courses');
+            }
+            return{
+                success: false,
+                message: 'Error in deleting course'
+            }
+        }catch(error){
+            console.error('Error in deleting the course: ', error.message);
+            return{
+                success: false,
+                message: error.message
             }
         }
-    
+    }
     //   async getCourseById(id: string) {
     //     return await this.courseRepository.findOne({ where: { id } });
     //   }
+
+    async updateCourse(course_id: string, status: CourseStatus): Promise<{success: boolean; message: string;}>{
+        try{
+            await this.courseRepository.updateCourseStatus(course_id, status);
+            return {
+                success: true,
+                message: 'Your course is updated successfully'
+            }
+        }catch(error){
+            console.error('Error in updating the course status: ', error.message);
+            return {
+                success: false,
+                message: error.message
+            }
+        }
+    }
+
+    async getAllCoursesForInstructor(instructor_id: string): Promise<{success: boolean; message: string; instructorCourses: any}>{
+        try{
+            const courses = await this.courseRepository.getAllCoursesForInstructor(instructor_id);
+            return {
+                success: true,
+                message: 'Manage your courses',
+                instructorCourses: courses
+            }
+        }catch(error){
+            console.error('Error in fetching the instructor courses: ', error.message);
+            return {
+                success: false,
+                message: error.message,
+                instructorCourses: null
+            }
+        }
+    }
 }
 
 

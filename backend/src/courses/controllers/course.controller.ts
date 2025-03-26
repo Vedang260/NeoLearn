@@ -10,6 +10,9 @@ import {
     Body,
     UseGuards,
     BadRequestException,
+    Req,
+    Delete,
+    Put,
   } from '@nestjs/common';
 import { CreateCourseDto } from "../dtos/createCourse.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt_auth.guard";
@@ -17,6 +20,7 @@ import { RolesGuard } from "src/auth/guards/roles.guard";
 import { UserRole } from "src/common/enums/roles.enum";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { diskStorage } from "multer";
+import { CourseStatus } from "src/common/enums/courseStatus.enum";
 
 @Controller('courses')
 @UseGuards(JwtAuthGuard)
@@ -49,5 +53,26 @@ export class CourseController {
     @Get()
     async getAllCourses(){
         return await this.courseService.getAllCourses();
+    }
+
+    @Get('/instructor')
+    @UseGuards(RolesGuard)
+    @Roles(UserRole.INSTRUCTOR)
+    async getAllCoursesForInstructor(@Req() req: Request){
+        return await this.courseService.getAllCoursesForInstructor(req['user'].userId);
+    }
+
+    @Delete(':id')
+    @UseGuards(RolesGuard)
+    @Roles(UserRole.INSTRUCTOR)
+    async deleteCourse(@Param('id') id: string){
+        return await this.courseService.deleteCourse(id);
+    }
+
+    @Put(':id')
+    @UseGuards(RolesGuard)
+    @Roles(UserRole.INSTRUCTOR)
+    async updateCourseStatus(@Param('id') id: string, @Body() status: CourseStatus){
+        return await this.courseService.updateCourse(id, status);
     }
 }
