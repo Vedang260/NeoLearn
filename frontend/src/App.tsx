@@ -12,6 +12,7 @@ import { ToastContainer } from 'react-toastify';
 import Navbar  from './components/Navbar';
 import StudentDashboard from './pages/StudentDashboard';
 import InstructorDashboard from './pages/InstructorDashboard';
+import Courses from './pages/Courses';
 
 const App: React.FC = () => {
   const { loading } = useSelector((state: RootState) => state.auth);
@@ -24,10 +25,10 @@ const App: React.FC = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<RouteBasedDashboard />} />
+          <Route path="/courses" element={<Courses />} /> 
+
           {/* 
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/add-expense" element={<AddExpense />} />
-          <Route path="/expenses" element={<ExpenseList />} /> */}
+          <Route path="/add-expense" element={<AddExpense />} />*/}
         </Routes>
         <ToastContainer
             position="top-right"

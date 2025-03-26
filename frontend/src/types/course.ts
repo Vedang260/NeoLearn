@@ -16,3 +16,13 @@ export interface EnrolledCourseData {
       video_url: string;
     };
   }
+
+export interface Course{
+  id: string;
+  title: string;
+  instructor_name: string;
+  duration: number;
+  status: string;
+  description: string;
+  video_url: string;
+} 

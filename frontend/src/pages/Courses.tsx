@@ -5,56 +5,58 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store/store';
 import Navbar from '../components/Navbar';
 import { useNavigate } from 'react-router-dom';
-import { getAllEnrolledCourses } from '../services/courses/api';
+import { enrollStudent, getAllCourses } from '../services/courses/api';
 import { toast } from 'react-toastify';
-import { EnrolledCourseData } from '../types/course';
+import { Course } from '../types/course';
 
-const StudentDashboard: React.FC = () => {
+const Courses: React.FC = () => {
   const { user, token } = useSelector((state: RootState) => state.auth);
-  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourseData[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!token || user?.role !== 'student') {
+    if (!token) {
       navigate('/login');
     }
-    fetchEnrolledCourses();
+    fetchAllCourses();
   }, [token, user?.role, navigate]);
 
-  const fetchEnrolledCourses = async() => {
+  const fetchAllCourses = async() => {
     try{
-      const response = await getAllEnrolledCourses();
+      const response = await getAllCourses();
       if(response.data.success){
-        setEnrolledCourses(response.data.enrolledCourses);
+        setCourses(response.data.courses);
         toast.success(response.data.message);
       }else{
         toast.error(response.data.message);
       }
     }catch(error){
-
+        toast.error('Failed to fetch the courses');
     }
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString.split("T")[0]); // Extract date part only
-    const day = date.getDate();
-    const month = date.toLocaleString('en-US', { month: 'long' });
-    const year = date.getFullYear();
-  
-    // Add suffix (st, nd, rd, th) to day
-    const getDayWithSuffix = (day: number) => {
-      if (day > 3 && day < 21) return `${day}th`;
-      switch (day % 10) {
-        case 1: return `${day}st`;
-        case 2: return `${day}nd`;
-        case 3: return `${day}rd`;
-        default: return `${day}th`;
-      }
+    const handleEnroll = async (course_id: string) => {
+        try{
+            const response = await enrollStudent({course_id});
+            if(response.data.success){
+              toast.success(response.data.message);
+              navigate('/dashboard');
+            }else{
+              toast.error(response.data.message);
+            }
+          }catch(error){
+              toast.error('Failed to fetch the courses');
+          }
+    }
+
+    const formatDuration = (seconds: number) => {
+        const hours = Math.floor(seconds / 3600); // Get total hours
+        const minutes = Math.floor((seconds % 3600) / 60); // Get remaining minutes
+      
+        return `${hours}h ${minutes}m`;
     };
-  
-    return `${getDayWithSuffix(day)} ${month}, ${year}`;
-  };
-  
+      
+
   return (
     <>
       <Navbar />
@@ -71,7 +73,7 @@ const StudentDashboard: React.FC = () => {
               fontFamily: 'Poppins, sans-serif',
             }}
           >
-            Your Learning Journey 🚀
+            Starting Upgrading Your Skills 🚀
           </Typography>
         </motion.div>
 
@@ -84,7 +86,7 @@ const StudentDashboard: React.FC = () => {
             gap: 4,
           }}
         >
-          {enrolledCourses.map((course) => (
+          {courses.map((course) => (
             <motion.div
               key={course.id}
               whileHover={{ scale: 1.05 }}
@@ -105,7 +107,7 @@ const StudentDashboard: React.FC = () => {
                 <CardMedia 
                   component="video" 
                   height="180"
-                  src={`http://localhost:8000${course.course.video_url}`}  
+                  src={`http://localhost:8000${course.video_url}`}  
                   controls
                   style={{ objectFit: 'cover', borderRadius: '10px' }}
                 />
@@ -116,16 +118,22 @@ const StudentDashboard: React.FC = () => {
                     variant="h5"
                     fontWeight="bold"
                     sx={{
-                      fontFamily: 'Poppins, sans-serif',
-                      textShadow: '2px 2px 10px rgba(255, 255, 255, 0.2)',
+                        fontFamily: 'Poppins, sans-serif',
+                        textShadow: '2px 2px 10px rgba(255, 255, 255, 0.2)',
+                        overflow: 'hidden', 
+                        whiteSpace: 'nowrap', 
+                        textOverflow: 'ellipsis',
+                        maxWidth: '100%', // Adjust width as needed
+                        display: 'block', // Required for ellipsis to work
                     }}
-                  >
-                    {course.course.title}
-                  </Typography>
+                    >
+                    {course.title}
+                    </Typography>
 
-                  {/* Enrolled Date & Status */}
+
+                  {/* Duration & Status */}
                   <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                    Enrolled on: {formatDate(course.enrollment_date)}
+                        Duration: {formatDuration(course.duration)}
                   </Typography>
 
                   <Typography
@@ -139,25 +147,8 @@ const StudentDashboard: React.FC = () => {
                     {course.status}
                   </Typography>
 
-                  {/* Progress Bar */}
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="body2">Progress: {course.progress}%</Typography>
-                    <LinearProgress
-                      variant="determinate"
-                      value={course.progress}
-                      sx={{
-                        height: 8,
-                        borderRadius: 5,
-                        backgroundColor: '#ccc',
-                        '& .MuiLinearProgress-bar': {
-                          backgroundColor: '#FFD700',
-                        },
-                      }}
-                    />
-                  </Box>
-
-                  {/* Continue Button */}
-                  <Button
+                  {/* Enroll Button */}
+                  { user?.role === 'student' && (<Button
                     fullWidth
                     variant="contained"
                     sx={{
@@ -174,11 +165,11 @@ const StudentDashboard: React.FC = () => {
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/course/${course.id}`);
+                      handleEnroll(course.id);
                     }}
                   >
-                    Continue Learning ▶️
-                  </Button>
+                    Enroll
+                  </Button>)}
                 </CardContent>
               </Card>
             </motion.div>
@@ -189,4 +180,4 @@ const StudentDashboard: React.FC = () => {
   );
 };
 
-export default StudentDashboard;
+export default Courses;
