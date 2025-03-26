@@ -1,9 +1,10 @@
 import { BadRequestException, Injectable, InternalServerErrorException, ParseIntPipe } from "@nestjs/common";
 import { CourseRepository } from "../repositories/course.repository";
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, join } from 'path';
 import { Course } from "../entities/course.entity";
 import { CreateCourseDto } from "../dtos/createCourse.dto";
+import * as ffmpeg from 'fluent-ffmpeg';
 
 @Injectable()
 export class CourseService{
@@ -16,13 +17,19 @@ export class CourseService{
             }
 
             // Validate that required fields are present
-            const { title, instructor_id, instructor_name, duration, description } = courseDto;
+            const { title, instructor_id, instructor_name, description } = courseDto;
 
-            if (!title || !instructor_id || !instructor_name || !duration || !description) {
+            if (!title || !instructor_id || !instructor_name || !description) {
                 throw new BadRequestException('Missing required course fields');
             }
-            // Video upload logic
-            const videoUrl = `/videos/${Date.now()}-${file.originalname}`;
+            
+            // Generate video URL
+            const videoFilename = `${Date.now()}-${file.originalname.replace(/\s/g, '_')}`;
+            const videoUrl = `/videos/${videoFilename}`;
+
+            // Get video duration
+             const videoPath = join(__dirname, '..', 'uploads/videos', videoFilename);
+            const duration = await this.getVideoDuration(videoPath);
     
             // Ensure the status field is correctly mapped
             // Ensure courseData matches CreateCourseDto type
@@ -46,6 +53,15 @@ export class CourseService{
           throw new InternalServerErrorException('Error in creating a new course');
         }
     }
+
+    getVideoDuration(filePath: string): Promise<number> {
+        return new Promise((resolve, reject) => {
+            ffmpeg.ffprobe(filePath, (err, metadata) => {
+                if (err) reject(err);
+                else resolve(metadata.format.duration); // Returns duration in seconds
+            });
+        });
+    }
     
         async getAllCourses(): Promise<{success: boolean; message: string; courses: Course[] | null}> {
             try{
@@ -65,3 +81,7 @@ export class CourseService{
     //     return await this.courseRepository.findOne({ where: { id } });
     //   }
 }
+
+
+
+
