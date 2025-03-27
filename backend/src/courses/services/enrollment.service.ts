@@ -1,6 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { EnrollmentRepository } from "../repositories/enrollment.repository";
 import { EnrolledCourseStatus } from "src/common/enums/courseStatus.enum";
+import { Course } from "../entities/course.entity";
+import { Enrollment } from "../entities/enrollment.entity";
 
 @Injectable()
 export class EnrollmentService{
@@ -68,6 +70,24 @@ export class EnrollmentService{
             return {
                 success: false,
                 message: error.message
+            }
+        }
+    }
+
+    async getEnrolledCourse(id: string): Promise<{success: boolean; message: string; course: Enrollment | null}>{
+        try{
+            const course = await this.enrollmentRepository.getEnrolledCourse(id);
+            return{
+                success: true,
+                message: 'Start completing your course',
+                course: course
+            }
+        }catch(error){
+            console.error('Error in fetching the course', error.message);
+            return {
+                success: false,
+                message: error.message,
+                course: null
             }
         }
     }

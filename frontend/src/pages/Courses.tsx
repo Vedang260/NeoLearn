@@ -101,7 +101,7 @@ const Courses: React.FC = () => {
                   boxShadow: '0px 4px 20px rgba(255, 215, 0, 0.3)',
                   cursor: 'pointer',
                 }}
-                onClick={() => navigate(`/course/${course.id}`)}
+                onClick={() => navigate(`/course/${course.id}`, { state: { course } })}
               >
                 {/* Course Thumbnail */}
                 <CardMedia 

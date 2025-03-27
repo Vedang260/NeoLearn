@@ -13,6 +13,7 @@ import Navbar  from './components/Navbar';
 import StudentDashboard from './pages/StudentDashboard';
 import InstructorDashboard from './pages/InstructorDashboard';
 import Courses from './pages/Courses';
+import CoursePage from './pages/CoursePage';
 
 const App: React.FC = () => {
   const { loading } = useSelector((state: RootState) => state.auth);
@@ -25,6 +26,7 @@ const App: React.FC = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<RouteBasedDashboard />} />
+          <Route path="/course/:courseId" element={<CoursePage />} />
           <Route path="/courses" element={<Courses />} /> 
 
           {/* 

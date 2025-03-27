@@ -16,6 +16,7 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+export const createCourse = (data: any) => api.post("/courses/create", JSON.stringify(data));
 export const getAllCourses = () => api.get("/courses");
 export const getAllEnrolledCourses = () => api.get("/enroll");
 export const enrollStudent = (data: any) => api.post("/enroll", JSON.stringify(data));

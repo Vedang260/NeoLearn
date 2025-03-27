@@ -11,6 +11,15 @@ export class EnrollmentRepository{
             private readonly enrollmentRepository: Repository<Enrollment>,
     ) {}
 
+    async getEnrolledCourse(id: string){
+        try{
+            const enrolledCourse = await this.enrollmentRepository.findOne({ where: {id}});
+            return enrolledCourse;
+        }catch(error){
+            console.error('Error in getting the enrolled course: ', error.message);
+            throw new InternalServerErrorException('Error in getting the course');
+        }
+    }
     async enrollStudent(user_id: string, course_id: string, enrollment_date: Date){
         try{
             const newEnrollment = this.enrollmentRepository.create({user_id, course_id,enrollment_date});

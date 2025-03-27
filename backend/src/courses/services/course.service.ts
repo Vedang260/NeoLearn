@@ -6,32 +6,64 @@ import { Course } from "../entities/course.entity";
 import { CreateCourseDto } from "../dtos/createCourse.dto";
 import * as ffmpeg from 'fluent-ffmpeg';
 import { CourseStatus } from "src/common/enums/courseStatus.enum";
+import * as ffmpegPath from 'ffmpeg-static';
+import * as ffprobePath from 'ffprobe-static';
+import { normalize } from 'path';
+import { existsSync, mkdirSync } from 'fs';
+
+// Initialize early in your application
+ffmpeg.setFfprobePath(ffprobePath.path);
+// Set the paths at application startup
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 @Injectable()
 export class CourseService{
-    constructor(private readonly courseRepository: CourseRepository) {}
+    private readonly uploadDir: string;
+    constructor(private readonly courseRepository: CourseRepository) {
+        this.uploadDir = normalize(join(process.cwd(), 'uploads', 'videos'));
+        this.ensureUploadDirExists();
+    }
 
-    async uploadVideoAndCreateCourse(file: Express.Multer.File, courseDto: Partial<CreateCourseDto>): Promise<{success: boolean; message: string; course: any}> {
+    private ensureUploadDirExists() {
+        if (!existsSync(this.uploadDir)) {
+            mkdirSync(this.uploadDir, { recursive: true });
+        }
+    }
+
+    async uploadVideoAndCreateCourse(file: Express.Multer.File, instructor_id: string, courseDto: Partial<CreateCourseDto>): Promise<{success: boolean; message: string; course: any}> {
         try{
             if (!file) {
                 throw new Error('Video file is required');
             }
 
             // Validate that required fields are present
-            const { title, instructor_id, instructor_name, description } = courseDto;
+            const { title, instructor_name, description } = courseDto;
 
             if (!title || !instructor_id || !instructor_name || !description) {
                 throw new BadRequestException('Missing required course fields');
             }
             
             // Generate video URL
-            const videoFilename = `${Date.now()}-${file.originalname.replace(/\s/g, '_')}`;
-            const videoUrl = `/videos/${videoFilename}`;
+            // 2. Use the actual saved file path (Multer already saved it)
+        const videoUrl = `/videos/${file.filename}`;
+        const videoPath = join(this.uploadDir, file.filename);
 
-            // Get video duration
-             const videoPath = join(__dirname, '..', 'uploads/videos', videoFilename);
-            const duration = await this.getVideoDuration(videoPath);
-    
+        console.log('Video path:', videoPath); // Debugging
+        console.log('File exists:', existsSync(videoPath));
+             // 3. Verify upload directory exists (should be done in controller)
+            if (!existsSync(join(process.cwd(), 'uploads', 'videos'))) {
+                throw new InternalServerErrorException('Upload directory not configured');
+            }
+
+            // 3. Get duration and round to nearest integer
+            let duration = 0;
+            
+            const rawDuration = await this.getVideoDuration(videoPath);
+            duration = Math.round(rawDuration); // Round to nearest integer
+            console.log('Raw duration:', rawDuration, 'Rounded duration:', duration);
+  
+            // Continue with duration 0 if calculation fails
+        
             // Ensure the status field is correctly mapped
             // Ensure courseData matches CreateCourseDto type
             const courseData: CreateCourseDto = {
@@ -55,11 +87,20 @@ export class CourseService{
         }
     }
 
-    getVideoDuration(filePath: string): Promise<number> {
-        return new Promise((resolve, reject) => {
+    async getVideoDuration(filePath: string): Promise<number> {
+        if (!existsSync(filePath)) {
+            console.error('File not found at path:', filePath);
+            return 0;
+        }
+
+        return new Promise((resolve) => {
             ffmpeg.ffprobe(filePath, (err, metadata) => {
-                if (err) reject(err);
-                else resolve(metadata.format.duration); // Returns duration in seconds
+                if (err) {
+                    console.error('FFprobe error:', err);
+                    resolve(0);
+                } else {
+                    resolve(metadata.format.duration || 0);
+                }
             });
         });
     }

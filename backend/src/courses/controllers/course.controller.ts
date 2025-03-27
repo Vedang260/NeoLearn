@@ -46,8 +46,8 @@ export class CourseController {
             cb(null, true);
         }
     }))
-    async createCourse(@UploadedFile() file: Express.Multer.File, @Body() courseData: Partial<CreateCourseDto>){
-        return await this.courseService.uploadVideoAndCreateCourse(file, courseData);
+    async createCourse(@UploadedFile() file: Express.Multer.File, @Req() req: Request, @Body() courseData: Partial<CreateCourseDto>){
+        return await this.courseService.uploadVideoAndCreateCourse(file, req['user'].userId, courseData);
     }
 
     @Get()

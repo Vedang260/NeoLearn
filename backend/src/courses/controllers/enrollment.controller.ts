@@ -10,6 +10,13 @@ import { RolesGuard } from "src/auth/guards/roles.guard";
 export class EnrollmentController {
     constructor( private readonly enrollmentService: EnrollmentService){}
     
+    @Get('/course/:id')
+    @UseGuards(RolesGuard)
+    @Roles(UserRole.STUDENT)
+    async getEnrolledCourse(@Param('id') id: string){
+        
+    }
+
     @Post()
     @UseGuards(RolesGuard)
     @Roles(UserRole.STUDENT)
